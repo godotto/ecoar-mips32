@@ -13,7 +13,6 @@ inputString:
 	.space	50
 colour:
 	.byte	0x0, 0x0, 0x0
-	.align 	0
 
 
 	.text
