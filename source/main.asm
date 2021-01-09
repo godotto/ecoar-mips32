@@ -17,11 +17,12 @@ colour:
 
 
 	.text
-	.globl main
+	.globl main, prompt, maxSize, errorInfo, inputString
+	
 main:
 	li	$v0, 4		# print string syscall
 	la	$a0, usageInfo
-	syscall			# print usage info
+	syscall
 	
 
 	
