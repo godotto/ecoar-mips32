@@ -38,13 +38,14 @@ colour:
 	la	$s3, -12($fp)	# rgb[] array pointer
 	
 colourLoopBeginning:
-	beq	$s1, '\0', endColourLoop
+	beq	$s1, $zero, endColourLoop
 	beq	$s1, '\n', coulourConvertFromCommandBuffer
 	bne	$s1, ' ', nextColourCharacter
 
 coulourConvertFromCommandBuffer:	
-	la	$a0, commandBuffer	# load one parameter from colour command to convertToNum function argument
-	#jal	convertToNum
+	sb	$zero, -1($s2)
+	la	$a0, -2($s2)	# load one parameter from colour command to convertToNum function argument
+	jal	convertToNum
 	sw	$v0, ($s3)		# save converted value into rgb[]
 	addiu	$s3, $s3, 4		# move rgb[] pointer
 	
