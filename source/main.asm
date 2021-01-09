@@ -26,6 +26,8 @@ main:
 loopBeginning:
 	jal	readString
 	jal	executeCommand
+	
+	move	$s0, $v0
 	bne	$s0, 1, loopBeginning	# if exit variable is true terminate program
 	
 	li	$v0, 10			# terminate execution syscall
