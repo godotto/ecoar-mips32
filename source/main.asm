@@ -20,12 +20,14 @@ colour:
 	.globl main, prompt, maxSize, errorInfo, inputString
 	
 main:
-	li	$v0, 4		# print string syscall
+	li	$v0, 4			# print string syscall
 	la	$a0, usageInfo
 	syscall
 	
-
+loopBeginning:
+	jal	readString
+	jal	executeCommand
+	bne	$s0, 1, loopBeginning	# if exit variable is true terminate program
 	
-	
-	li	$v0, 10		# terminate execution syscall
+	li	$v0, 10			# terminate execution syscall
 	syscall
