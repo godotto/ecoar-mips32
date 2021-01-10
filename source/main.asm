@@ -1,7 +1,8 @@
 	.data
 
 display:
-	.space	4096
+	.space	32768
+	.word	10
 
 usageInfo:
 	.asciiz	"Usage instruction:\n\t<direction> <steps> to draw\n\tC <red> <green> <blue> to change colour\n\tq to end program\n"
@@ -23,7 +24,7 @@ colourValue:
 	.align	2
 	
 currentCoordinates:
-	.byte	0, 0
+	.byte	31, 31
 	.align	2
 
 	.text

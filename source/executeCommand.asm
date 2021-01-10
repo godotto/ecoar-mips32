@@ -80,6 +80,7 @@ nextColourCharacter:
 endColourLoop:
 	addiu	$sp, $sp, 12	# pop array from stack
 	beq	$v0, -1, error
+	bgt	$v0, 255, error
 	
 	xor 	$v0, $v0, $v0	# non-termination signal for main
 	
@@ -146,6 +147,7 @@ nextDrawCharacter:
 endDrawLoop:
 	addiu	$sp, $sp, 8	# pop array from stack
 	beq	$v0, -1, error
+	bgt	$v0, 64, error
 	
 	la	$a0, -8($fp)	# load address of drawInstructions[] and pass to drawLine function
 	jal	drawLine

@@ -37,6 +37,7 @@ drawWest:
 	
 	bne	$t5, -1, drawWest
 	li	$t5, 63		# if left boundary of display has been exceeded go to the right boundary
+	b	drawWest
 	
 drawEast:
 	beq	$t4, $zero, return
@@ -52,10 +53,12 @@ drawEast:
 	addiu	$t5, $t5, 1	# go 1 pixel right
 	subiu	$t4, $t4, 1	# decrement number of steps
 	
-	bne	$t5, -1, drawEast
+	bne	$t5, 64, drawEast
 	li	$t5, 0		# if right boundary of display has been exceeded go to the left boundary
+	b	drawEast
 	
 drawNorth:
+	
 	beq	$t4, $zero, return
 	
 	mul	$t7, $t6, 64	# y * display_width
@@ -71,6 +74,7 @@ drawNorth:
 	
 	bne	$t6, -1, drawNorth
 	li	$t6, 63		# if upper boundary of display has been exceeded go to the lower boundary
+	b	drawNorth
 	
 drawSouth:
 	beq	$t4, $zero, return
@@ -83,7 +87,12 @@ drawSouth:
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
 	
-	addiu	$t6, $t6, 1	# go 1 pixel right
+	addiu	$t6, $t6, 1	# go 1 pixel downwards
+	subiu	$t4, $t4, 1	# decrement number of steps
+	
+	bne	$t6, 64, drawSouth
+	li	$t6, 0		# if lower boundary of display has been exceeded go to the upper boundary
+	b	drawSouth
 	subiu	$t4, $t4, 1	# decrement number of steps
 	
 	bne	$t6, -1, drawSouth
