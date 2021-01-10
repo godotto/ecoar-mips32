@@ -58,13 +58,15 @@ colourLoopBeginning:
 	bne	$s1, ' ', nextColourCharacter			 
 
 saveColourIntoArray:	
-	sb	$zero, -1($s2)		# remove space or new line character on the end of command buffer
-	la	$a0, -2($s2)		# load one parameter from colour command to convertToNum function argument
+	sb	$zero, -1($s2)			# remove space or new line character on the end of command buffer
+	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
-	sw	$v0, ($s3)		# save converted value into rgb[]
-	addiu	$s3, $s3, 4		# move rgb[] pointer
+	beq	$v0, -1, endColourLoop		# if number is incorrect stop processing
+	bge	$v0, 255, endColourLoop		# if number exceeds 255 stop processing
+	sw	$v0, ($s3)			# save converted value into rgb[]
+	addiu	$s3, $s3, 4			# move rgb[] pointer
 	
-	la	$s2, commandBuffer	# clear command buffer
+	la	$s2, commandBuffer		# clear command buffer
 	sw	$zero, ($s2)
 	sw	$zero, 4($s2)
 	sw	$zero, 8($s2)
@@ -79,6 +81,8 @@ nextColourCharacter:
 	
 endColourLoop:
 	addiu	$sp, $sp, 12	# pop array from stack
+	beq	$v0, -1, error
+	
 	xor 	$v0, $v0, $v0	# non-termination signal for main
 	
 	lb	$t0, -12($fp)	# update RGB values
@@ -112,18 +116,21 @@ saveInstructionsIntoArray:
 	sb	$zero, -1($s2)		# remove space or new line character on the end of command buffer
 	beq	$s4, 1, saveSteps
 	
-	la	$a0, commandBuffer	# load argument for directionVerify function
+	la	$a0, commandBuffer		# load argument for directionVerify function
 	jal	directionVerify
-	sw	$v0, ($s3)		# save verified input into drawInstructions[]
-	addiu	$s3, $s3, 4		# move drawInstructions[] pointer
-	addiu	$s4, $s4, 1		# mark that direction has been processed
+	beq	$v0, -1, endDrawLoop		# if direction is incorrect stop processing
+	sw	$v0, ($s3)			# save verified input into drawInstructions[]
+	addiu	$s3, $s3, 4			# move drawInstructions[] pointer
+	addiu	$s4, $s4, 1			# mark that direction has been processed
 	b	clearCommandBuffer
 	
 saveSteps:
-	la	$a0, -2($s2)		# load one parameter from colour command to convertToNum function argument
+	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
-	sw	$v0, ($s3)		# save converted value into drawInstructions[]
-	addiu	$s3, $s3, 4		# move drawInstructions[] pointer
+	beq	$v0, -1, endDrawLoop		# if number is incorrect stop processing
+	beq	$v0, 64, endDrawLoop		# if number exceeds size of picture stop processing
+	sw	$v0, ($s3)			# save converted value into drawInstructions[]
+	addiu	$s3, $s3, 4			# move drawInstructions[] pointer
 	
 clearCommandBuffer:
 	la	$s2, commandBuffer	# clear command buffer
@@ -139,6 +146,15 @@ nextDrawCharacter:
 	b	drawLoopBeginning
 	
 endDrawLoop:
+	addiu	$sp, $sp, 8	# pop array from stack
+	beq	$v0, -1, error
+	
+	b	return
+error:
+	li	$v0, 4		# print string syscall
+	la	$a0, errorInfo
+	syscall
+	b	return
 	
 quit:
 	li	$v0, 1		# program termination signal for main
