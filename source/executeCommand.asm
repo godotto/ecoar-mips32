@@ -1,7 +1,5 @@
 	.data
 	
-	.align	2
-	
 commandBuffer:
 	.space	12
 	
@@ -62,7 +60,7 @@ saveColourIntoArray:
 	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
 	beq	$v0, -1, endColourLoop		# if number is incorrect stop processing
-	bge	$v0, 255, endColourLoop		# if number exceeds 255 stop processing
+	bgt	$v0, 255, endColourLoop		# if number exceeds 255 stop processing
 	sw	$v0, ($s3)			# save converted value into rgb[]
 	addiu	$s3, $s3, 4			# move rgb[] pointer
 	
@@ -85,13 +83,13 @@ endColourLoop:
 	
 	xor 	$v0, $v0, $v0	# non-termination signal for main
 	
-	lb	$t0, -12($fp)	# update RGB values
+	lb	$t0, -4($fp)	# update RGB values
 	sb	$t0, colourValue
 	
 	lb	$t0, -8($fp)
 	sb	$t0, colourValue + 1
 	
-	lb	$t0, -4($fp)
+	lb	$t0, -12($fp)
 	sb	$t0, colourValue + 2
 	
 	b	return
@@ -128,7 +126,7 @@ saveSteps:
 	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
 	beq	$v0, -1, endDrawLoop		# if number is incorrect stop processing
-	beq	$v0, 64, endDrawLoop		# if number exceeds size of picture stop processing
+	bgt	$v0, 64, endDrawLoop		# if number exceeds size of picture stop processing
 	sw	$v0, ($s3)			# save converted value into drawInstructions[]
 	addiu	$s3, $s3, 4			# move drawInstructions[] pointer
 	
@@ -149,6 +147,9 @@ endDrawLoop:
 	addiu	$sp, $sp, 8	# pop array from stack
 	beq	$v0, -1, error
 	
+	la	$a0, -8($fp)	# load address of drawInstructions[] and pass to drawLine function
+	jal	drawLine
+	
 	b	return
 error:
 	li	$v0, 4		# print string syscall
@@ -157,7 +158,7 @@ error:
 	b	return
 	
 quit:
-	li	$v0, 1		# program termination signal for main
+	li	$v1, 1		# program termination signal for main
 	
 return:				# restore saved registers
 	lw	$s3, 20($sp) 
