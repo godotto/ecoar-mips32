@@ -11,8 +11,6 @@ convertToNum:
 	
 	li	$t4, 1		# initialize digit counter
 	li	$t5, 1		# initialize 10's multiple register
-	
-	xor	$t8, $t8, $t8	# initialize multiplication register
 
 conversionStart:
 	lbu	$t6, ($t0)		# currently processed character
@@ -26,9 +24,9 @@ conversionStart:
 	
 	beq	$t4, 1, firstDigit	# do not multiply by 10's multiple if first digit
 	mul	$t5, $t5, 10		# increase 10's multiple
-	mul	$t8, $t7, $t5
-	
+
 firstDigit:
+	mul	$t8, $t7, $t5
 	addu	$t1, $t1, $t8		# add converted value to the accumulator
 	
 	subiu	$t0, $t0, 1		# move input string pointer
