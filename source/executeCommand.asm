@@ -7,7 +7,8 @@ commandBuffer:
 	.globl executeCommand
 	
 executeCommand:
-	subiu	$sp, $sp, 24		# allocate stack frame and save $s0-$s3, $ra and $fp
+	subiu	$sp, $sp, 28		# allocate stack frame and save $s0-$s4, $ra and $fp
+	sw	$s4, 24($sp)
 	sw	$s3, 20($sp)
 	sw	$s2, 16($sp)
 	sw	$s1, 12($sp)
@@ -36,13 +37,16 @@ executeCommand:
 	beq	$s1, 's', draw		# if 's' then process drawing command
 	beq	$s1, 'e', draw		# if 'e' then process drawing command
 	
+	b	error			# else print error message
+	
 colour:
 	la	$s2, commandBuffer	# clear command buffer
 	sw	$zero, ($s2)
 	sw	$zero, 4($s2)
 	sw	$zero, 8($s2)		
 	
-	addiu	$s0, $s0, 2		# move input string pointer (and skip one space)
+	lbu	$t0, ($s0)		# store previous character
+	addiu	$s0, $s0, 1		# move input string pointer (and skip one space)
 	lbu	$s1, ($s0)		# currently processed character
 	sb	$s1, ($s2)		# store character in command buffer
 	addiu	$s2, $s2, 1		# move command buffer pointer
@@ -51,11 +55,13 @@ colour:
 	la	$s3, -12($fp)		# rgb[] array pointer
 	
 colourLoopBeginning:
+	beq	$t0, 'C', colourClearCommandBuffer		# if it is the first character
 	beq	$s1, $zero, endColourLoop			# if it is the end of input finish loop
 	beq	$s1, '\n', saveColourIntoArray			# after last character of input there is always new line character, so it's necessary to cover that case
 	bne	$s1, ' ', nextColourCharacter			 
 
 saveColourIntoArray:	
+	beq	$t0, ' ', endColourLoop		# if space is next to space stop processing
 	sb	$zero, -1($s2)			# remove space or new line character on the end of command buffer
 	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
@@ -63,13 +69,15 @@ saveColourIntoArray:
 	bgt	$v0, 255, endColourLoop		# if number exceeds 255 stop processing
 	sw	$v0, ($s3)			# save converted value into rgb[]
 	addiu	$s3, $s3, 4			# move rgb[] pointer
-	
+
+colourClearCommandBuffer:	
 	la	$s2, commandBuffer		# clear command buffer
 	sw	$zero, ($s2)
 	sw	$zero, 4($s2)
 	sw	$zero, 8($s2)
 	
 nextColourCharacter:
+	lbu	$t0, ($s0)	# previous character
 	addiu	$s0, $s0, 1	# move input string pointer
 	lbu	$s1, ($s0)	# currently processed character
 	sb	$s1, ($s2)	# store character in command buffer
@@ -81,6 +89,7 @@ endColourLoop:
 	addiu	$sp, $sp, 12	# pop array from stack
 	beq	$v0, -1, error
 	bgt	$v0, 255, error
+	beq	$t0, ' ', error
 	
 	xor 	$v0, $v0, $v0	# non-termination signal for main
 	
@@ -99,6 +108,7 @@ draw:
 	subiu	$sp, $sp, 8	# allocate 2-elements array drawInstructions[] to store instructions for another function
 	la	$s3, -8($fp)	# pointer on drawInstructions[]
 	
+	lbu	$t0, ($s0)	# store previous character
 	addiu	$s0, $s0, 1	# move input string pointer
 	lbu	$s1, ($s0)	# currently processed character
 	sb	$s1, ($s2)	# store character in command buffer
@@ -124,6 +134,7 @@ saveInstructionsIntoArray:
 	b	clearCommandBuffer
 	
 saveSteps:
+	beq	$t0, ' ', endDrawLoop		# if space is next to space stop processing
 	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
 	beq	$v0, -1, endDrawLoop		# if number is incorrect stop processing
@@ -137,6 +148,7 @@ clearCommandBuffer:
 	sw	$zero, 4($s2)
 	
 nextDrawCharacter:
+	lbu	$t0, ($s0)	# previous character
 	addiu	$s0, $s0, 1	# move input string pointer
 	lbu	$s1, ($s0)	# currently processed character
 	sb	$s1, ($s2)	# store character in command buffer
@@ -148,6 +160,7 @@ endDrawLoop:
 	addiu	$sp, $sp, 8	# pop array from stack
 	beq	$v0, -1, error
 	bgt	$v0, 64, error
+	beq	$t0, ' ', error
 	
 	la	$a0, -8($fp)	# load address of drawInstructions[] and pass to drawLine function
 	jal	drawLine
@@ -163,6 +176,7 @@ quit:
 	li	$v1, 1		# program termination signal for main
 	
 return:				# restore saved registers
+	lw	$s4, 24($sp)
 	lw	$s3, 20($sp) 
 	lw	$s2, 16($sp)
 	lw	$s1, 12($sp)
