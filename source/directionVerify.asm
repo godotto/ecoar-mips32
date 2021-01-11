@@ -1,3 +1,8 @@
+# Description of used registers
+#	$t0 - pointer on command buffer
+#	$t1 - the first character from command buffer
+#	$t2 - the second character from command buffer
+
 	.text
 	.globl	directionVerify
 	

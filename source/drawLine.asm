@@ -1,6 +1,18 @@
-	.eqv	NW 0x574e
-	.eqv	Nw 0x774e
-	.eqv	nW 0x576e
+# Description of used registers:
+#	$t0 - pointer on instruction array
+#	$t1 - pointer on currentCoordinates global variable
+#	$t2 - pointer on display's address
+#	$t3 - direction
+#	$t4 - number of steps
+#	$t5 - x coordinate
+#	$t6 - y coordinate
+#	$t7 - current location on display
+#	$t8 - value of coloured from colourValue global variable
+#	$t9 - information in which direction draw pixel for diagonal lines
+	
+	.eqv	NW 0x574e	# ASCII codes for strings; as register may store two characters,
+	.eqv	Nw 0x774e	# it is more convenient to compare register's value to ASCII
+	.eqv	nW 0x576e	# codes of two chars combined into string
 	.eqv	nw 0x776e
 	
 	.eqv	NE 0x454e
@@ -8,7 +20,7 @@
 	.eqv	nE 0x456e
 	.eqv	ne 0x656e
 	
-	.eqv	S_W 0x5753
+	.eqv	S_W 0x5753	# underscore character is needed as sw is MIPS32 store word instruction
 	.eqv	S_w 0x7753
 	.eqv	s_W 0x5773
 	.eqv	s_w 0x7773
@@ -147,7 +159,7 @@ drawNorthWest:
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
 	
-	beq	$t9, 1, nwWest
+	beq	$t9, 1, nwWest	# if 1 go left
 	subiu	$t6, $t6, 1	# go 1 pixel upwards
 	li	$t9, 1		# next time line will go left
 	b	nwNextStep
@@ -176,7 +188,7 @@ drawNorthEast:
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
 	
-	beq	$t9, 1, neEast
+	beq	$t9, 1, neEast	# if 1 go right
 	subiu	$t6, $t6, 1	# go 1 pixel upwards
 	li	$t9, 1		# next time line will go right
 	b	neNextStep
@@ -205,7 +217,7 @@ drawSouthWest:
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
 	
-	beq	$t9, 1, swWest
+	beq	$t9, 1, swWest	# if 1 go left
 	addiu	$t6, $t6, 1	# go 1 pixel downwards
 	li	$t9, 1		# next time line will go left
 	b	swNextStep
@@ -234,7 +246,7 @@ drawSouthEast:
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
 	
-	beq	$t9, 1, seEast
+	beq	$t9, 1, seEast	# if 1 go right
 	addiu	$t6, $t6, 1	# go 1 pixel downwards
 	li	$t9, 1		# next time line will go right
 	b	seNextStep
@@ -253,7 +265,7 @@ seNextStep:
 	b	drawSouthEast
 	
 return:
-	sb	$t5, currentCoordinates
+	sb	$t5, currentCoordinates		# save coordinates
 	sb	$t6, currentCoordinates + 1
 	
 	jr	$ra

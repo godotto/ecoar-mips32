@@ -1,3 +1,14 @@
+# Description of used registers
+#	$t0 - pointer on command buffer
+#	$t1 - accumulator
+#	$t2 - 0 constant for comparison
+#	$t3 - 9 constant for comparison
+#	$t4 - digit counter
+#	$t5 - 10's multiples needed for multiplication
+#	$t6 - currently processed character
+#	$t7 - number converted from ASCII
+#	$t8 - buffer for multiplication result
+	
 	.text
 	.globl	convertToNum
 	

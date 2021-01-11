@@ -1,3 +1,11 @@
+# Description of used registers:
+#	$s0 - pointer on input string
+#	$s1 - currently processed character
+#	$s2 - pointer on command buffer
+#	$s3 - pointer on rgb[]/drawInstructions[] arrays
+#	$s4 - information whether direction has been processed
+#	$t0 - previously processed character
+
 	.data
 	
 commandBuffer:
@@ -46,7 +54,7 @@ colour:
 	sw	$zero, 8($s2)		
 	
 	lbu	$t0, ($s0)		# store previous character
-	addiu	$s0, $s0, 1		# move input string pointer (and skip one space)
+	addiu	$s0, $s0, 1		# move input string pointer
 	lbu	$s1, ($s0)		# currently processed character
 	sb	$s1, ($s2)		# store character in command buffer
 	addiu	$s2, $s2, 1		# move command buffer pointer
@@ -55,13 +63,14 @@ colour:
 	la	$s3, -12($fp)		# rgb[] array pointer
 	
 colourLoopBeginning:
-	beq	$t0, 'C', colourClearCommandBuffer		# if it is the first character
+	beq	$t0, 'C', colourClearCommandBuffer		# if it is the first character, skip it
 	beq	$s1, $zero, endColourLoop			# if it is the end of input finish loop
 	beq	$s1, '\n', saveColourIntoArray			# after last character of input there is always new line character, so it's necessary to cover that case
 	bne	$s1, ' ', nextColourCharacter			 
 
 saveColourIntoArray:	
 	beq	$t0, ' ', endColourLoop		# if space is next to space stop processing
+	
 	sb	$zero, -1($s2)			# remove space or new line character on the end of command buffer
 	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum

@@ -1,3 +1,6 @@
+# Description of used registers:
+#	$s0 - information if program should be terminated or not
+
 	.data
 
 display:
@@ -5,16 +8,15 @@ display:
 	.word	10
 
 usageInfo:
-	.asciiz	"Usage instruction:\n\t<direction> <steps> to draw\n\tC <red> <green> <blue> to change colour\n\tq to end program\n"
+	.asciiz	"Usage instruction:\n\t<direction> <steps> to draw (display 64x64 px, maximal amount of steps for input is 64)\n\tC <red> <green> <blue> to change colour\n\tq to end program\n"
 
 prompt:
 	.asciiz "Command: "
 	
 errorInfo:
 	.asciiz "Wrong command\n"
-maxSize:
-	.byte	63
 	.align	1
+	.align 	0
 	
 inputString:
 	.space	50
@@ -28,7 +30,7 @@ currentCoordinates:
 	.align	2
 
 	.text
-	.globl main, prompt, maxSize, errorInfo, inputString, colourValue, display, currentCoordinates
+	.globl main, prompt, errorInfo, inputString, colourValue, display, currentCoordinates
 	
 main:
 	li	$v0, 4			# print string syscall
