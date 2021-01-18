@@ -72,7 +72,7 @@ saveColourIntoArray:
 	beq	$t0, ' ', endColourLoop		# if space is next to space stop processing
 	
 	sb	$zero, -1($s2)			# remove space or new line character on the end of command buffer
-	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
+	la	$a0, commandBuffer		# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
 	beq	$v0, -1, endColourLoop		# if number is incorrect stop processing
 	bgt	$v0, 255, endColourLoop		# if number exceeds 255 stop processing
@@ -144,7 +144,7 @@ saveInstructionsIntoArray:
 	
 saveSteps:
 	beq	$t0, ' ', endDrawLoop		# if space is next to space stop processing
-	la	$a0, -2($s2)			# load one parameter from colour command to convertToNum function argument
+	la	$a0, commandBuffer			# load one parameter from colour command to convertToNum function argument
 	jal	convertToNum
 	beq	$v0, -1, endDrawLoop		# if number is incorrect stop processing
 	bgt	$v0, 64, endDrawLoop		# if number exceeds size of picture stop processing
