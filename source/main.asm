@@ -3,10 +3,6 @@
 
 	.data
 
-display:
-	.space	32768
-	.word	10
-
 usageInfo:
 	.asciiz	"Usage instruction:\n\t<direction> <steps> to draw (display 64x64 px, maximal amount of steps for input is 64)\n\tC <red> <green> <blue> to change colour\n\tq to end program\n"
 
@@ -26,11 +22,11 @@ colourValue:
 	.align	2
 	
 currentCoordinates:
-	.byte	31, 31
+	.byte	124, 124
 	.align	2
 
 	.text
-	.globl main, prompt, errorInfo, inputString, colourValue, display, currentCoordinates
+	.globl main, prompt, errorInfo, inputString, colourValue, currentCoordinates
 	
 main:
 	li	$v0, 4			# print string syscall
