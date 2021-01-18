@@ -10,24 +10,9 @@
 #	$t8 - value of coloured from colourValue global variable
 #	$t9 - information in which direction draw pixel for diagonal lines
 	
-	.eqv	NW 0x574e	# ASCII codes for strings; as register may store two characters,
-	.eqv	Nw 0x774e	# it is more convenient to compare register's value to ASCII
-	.eqv	nW 0x576e	# codes of two chars combined into string
-	.eqv	nw 0x776e
-	
-	.eqv	NE 0x454e
-	.eqv	Ne 0x654e
-	.eqv	nE 0x456e
-	.eqv	ne 0x656e
-	
-	.eqv	S_W 0x5753	# underscore character is needed as sw is MIPS32 store word instruction
-	.eqv	S_w 0x7753
-	.eqv	s_W 0x5773
-	.eqv	s_w 0x7773
-	
-	.eqv	SE 0x4553
-	.eqv	Se 0x6553
-	.eqv	sE 0x4573
+	.eqv	nw 0x776e	# ASCII codes for strings; as register may store two characters,
+	.eqv	ne 0x656e	# it is more convenient to compare register's value to ASCII
+	.eqv	s_w 0x7773	# codes of two chars combined into string
 	.eqv	se 0x6573
 	
 	.eqv	display, 0x10040000
@@ -48,33 +33,14 @@ drawLine:
 	
 	xor	$t9, $t9, $t9		# store information in which direction draw pixel for diagonal lines
 	
-	beq	$t3, NW, drawNorthWest
-	beq	$t3, Nw, drawNorthWest
-	beq	$t3, nW, drawNorthWest
 	beq	$t3, nw, drawNorthWest
-	
-	beq	$t3, NE, drawNorthEast
-	beq	$t3, Ne, drawNorthEast
-	beq	$t3, nE, drawNorthEast
 	beq	$t3, ne, drawNorthEast
-	
-	beq	$t3, S_W, drawSouthWest
-	beq	$t3, S_w, drawSouthWest
-	beq	$t3, s_W, drawSouthWest
 	beq	$t3, s_w, drawSouthWest
-	
-	beq	$t3, SE, drawSouthEast
-	beq	$t3, Se, drawSouthEast
-	beq	$t3, sE, drawSouthEast
 	beq	$t3, se, drawSouthEast
 	
-	beq	$t3, 'W', drawWest
 	beq	$t3, 'w', drawWest
-	beq	$t3, 'E', drawEast
 	beq	$t3, 'e', drawEast
-	beq	$t3, 'N', drawNorth
 	beq	$t3, 'n', drawNorth
-	beq	$t3, 'S', drawSouth
 	beq	$t3, 's', drawSouth
 	
 drawWest:
@@ -257,7 +223,7 @@ seNextStep:
 	bne	$t5, 256, drawSouthEast
 	li	$t5, 0		# if right boundary of display has been exceeded go to the left boundary
 	b	drawSouthEast
-	
+
 return:
 	sb	$t5, currentCoordinates		# save coordinates
 	sb	$t6, currentCoordinates + 1
