@@ -9,7 +9,7 @@
 #	$t7 - current location on display
 #	$t8 - value of coloured from colourValue global variable
 #	$t9 - information in which direction draw pixel for diagonal lines
-	
+
 	.eqv	nw 0x776e	# ASCII codes for strings; as register may store two characters,
 	.eqv	ne 0x656e	# it is more convenient to compare register's value to ASCII
 	.eqv	s_w 0x7773	# codes of two chars combined into string
@@ -21,6 +21,9 @@
 	.globl	drawLine
 	
 drawLine:
+	subiu	$sp, $sp, 12
+	sw	$ra, ($sp)
+	
 	la	$t0, ($a0)		# instruction array pointer
 	la	$t1, currentCoordinates	# current coordinates pointer
 	li	$t2, display		# addres of the first pixel of display
@@ -46,9 +49,7 @@ drawLine:
 drawWest:
 	beq	$t4, $zero, return
 	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
+	jal	drawPixel
 	
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
@@ -63,9 +64,7 @@ drawWest:
 drawEast:
 	beq	$t4, $zero, return
 	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
+	jal	drawPixel
 	
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
@@ -78,46 +77,39 @@ drawEast:
 	b	drawEast
 	
 drawNorth:
-	
 	beq	$t4, $zero, return
-	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
-	
+
+	jal	drawPixel
+
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
-	
+
 	subiu	$t6, $t6, 4	# go 1 pixel upwards
 	subiu	$t4, $t4, 1	# decrement number of steps
-	
+
 	bne	$t6, -4, drawNorth
 	li	$t6, 252		# if upper boundary of display has been exceeded go to the lower boundary
 	b	drawNorth
-	
+
 drawSouth:
 	beq	$t4, $zero, return
-	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
-	
+
+	jal	drawPixel
+
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
-	
+
 	addiu	$t6, $t6, 4	# go 1 pixel downwards
 	subiu	$t4, $t4, 1	# decrement number of steps
-	
+
 	bne	$t6, 256, drawSouth
 	li	$t6, 0		# if lower boundary of display has been exceeded go to the upper boundary
 	b	drawSouth
-	
+
 drawNorthWest:
 	beq	$t4, $zero, return
 	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
+	jal	drawPixel
 	
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
@@ -126,7 +118,7 @@ drawNorthWest:
 	subiu	$t6, $t6, 4	# go 1 pixel upwards
 	li	$t9, 1		# next time line will go left
 	b	nwNextStep
-	
+
 nwWest:
 	subiu	$t5, $t5, 4	# go 1 pixel left
 	xor	$t9, $t9, $t9	# next time line will go upwards
@@ -139,13 +131,11 @@ nwNextStep:
 	bne	$t5, -4, drawNorthWest
 	li	$t5, 252		# if left boundary of display has been exceeded go to the right boundary
 	b	drawNorthWest
-	
+
 drawNorthEast:
 	beq	$t4, $zero, return
 	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
+	jal	drawPixel
 	
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
@@ -167,13 +157,11 @@ neNextStep:
 	bne	$t5, 256, drawNorthEast
 	li	$t5, 0		# if right boundary of display has been exceeded go to the left boundary
 	b	drawNorthEast
-	
+
 drawSouthWest:
 	beq	$t4, $zero, return
 	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
+	jal	drawPixel
 	
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
@@ -182,7 +170,7 @@ drawSouthWest:
 	addiu	$t6, $t6, 4	# go 1 pixel downwards
 	li	$t9, 1		# next time line will go left
 	b	swNextStep
-	
+
 swWest:
 	subiu	$t5, $t5, 4	# go 1 pixel south
 	xor	$t9, $t9, $t9	# next time line will go downwards
@@ -195,13 +183,11 @@ swNextStep:
 	bne	$t5, -4, drawSouthWest
 	li	$t5, 252		# if left boundary of display has been exceeded go to the right boundary
 	b	drawSouthWest
-	
+
 drawSouthEast:
 	beq	$t4, $zero, return
 	
-	mul	$t7, $t6, 64	# y * display_width
-	addu	$t7, $t7, $t5	# x + y * display_width
-	addu	$t7, $t7, $t2	# current location on display
+	jal	drawPixel
 	
 	lw	$t8, colourValue
 	sw	$t8, ($t7)	# colour one pixel
@@ -224,8 +210,17 @@ seNextStep:
 	li	$t5, 0		# if right boundary of display has been exceeded go to the left boundary
 	b	drawSouthEast
 
+drawPixel:
+	mul	$t7, $t6, 64	# y * display_width
+	addu	$t7, $t7, $t5	# x + y * display_width
+	addu	$t7, $t7, $t2	# current location on display
+	
+	jr	$ra
+
 return:
 	sb	$t5, currentCoordinates		# save coordinates
 	sb	$t6, currentCoordinates + 1
+	lw	$ra, ($sp)
+	addiu	$sp, $sp, 12
 	
 	jr	$ra
