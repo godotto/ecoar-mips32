@@ -183,7 +183,7 @@ seNextStep:
 	b	drawSouthEast
 
 drawPixel:
-	mul	$t7, $t6, 64	# y * display_width
+	sll	$t7, $t6, 6	# y * display_width
 	addu	$t7, $t7, $t5	# x + y * display_width
 	addu	$t7, $t7, $t2	# current location on display
 	
